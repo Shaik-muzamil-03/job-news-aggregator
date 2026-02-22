@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: jobuser
+      POSTGRES_PASSWORD: jobpass
+      POSTGRES_DB: jobdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build: .
+    command: uvicorn src.app.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - ./src:/app/src
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://jobuser:jobpass@db:5432/jobdb
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:
